@@ -22,7 +22,7 @@ import tempfile
 import os.path
 import subprocess
 import base64
-
+import sys
 
 # Global vars
 BLOCK_RE = re.compile(
@@ -78,12 +78,7 @@ class InlineMermaidPreprocessor(markdown.preprocessors.Preprocessor):
                         stdout, stderr = proc.communicate(input=content.encode('utf-8'))
 
                         if not os.path.isfile(path):
-                            return (
-                                '<pre>Error : Image not created</pre>'
-                                '<pre>Args : ' + str(args) + '</pre>'
-                                '<pre>stdout : ' + stdout.decode('utf-8') + '</pre>'
-                                '<pre>stderr : ' + stderr.decode('utf-8') + '</pre>'
-                                '<pre>graph code : ' + content + '</pre>').split('\n')
+                            raise Exception(f"Image not created. Args: {args}, stdout: {stdout.decode('utf-8')}, stderr: {stderr.decode('utf-8')}, graph code: ${content}")
 
                         with open(path, 'rb') as f:
                             encodedImageContent = base64.b64encode(f.read()).decode('utf-8')
@@ -93,10 +88,8 @@ class InlineMermaidPreprocessor(markdown.preprocessors.Preprocessor):
                                 text[:m.start()], self.md.htmlStash.store(img), text[m.end():])
 
                     except Exception as e:
-                            return (
-                                '<pre>Error : ' + str(e) + '</pre>'
-                                '<pre>Args : ' + str(args) + '</pre>'
-                                '<pre>' + content + '</pre>').split('\n')
+                            print(e)
+                            sys.exit(1)
 
             else:
                 break
